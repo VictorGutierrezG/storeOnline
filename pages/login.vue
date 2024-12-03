@@ -48,7 +48,7 @@
     async handleLogin() {
         try {
         await this.$store.dispatch('auth/login', { username: this.username, password: this.password })
-        this.$router.push('/')
+        this.$router.push('/products')
         } catch (err) {
         this.error = 'Invalid username or password'
         }

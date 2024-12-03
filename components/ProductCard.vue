@@ -31,17 +31,11 @@
   export default class ProductCard extends Vue {
     @Prop({ required: true }) product!: Product
   
+    // Función para añadir al carrito utilizando Vuex
     addToCart() {
-      this.$emit('add-to-cart', this.product)
+      // Asegúrate de usar el nombre completo para la acción: 'cart/addToCart'
+      this.$store.dispatch('cart/addToCart', this.product)
     }
   }
   </script>
-  
-  <style scoped>
-  /* Estilos adicionales para las tarjetas */
-  .card-text {
-    font-size: 14px;
-    color: #555;
-  }
-  </style>
   
