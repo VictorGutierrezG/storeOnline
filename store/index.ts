@@ -1,19 +1,18 @@
-// store/index.ts
-export const state = () => ({
-    myVariable: '' as string,
+import Vuex from 'vuex'
+import { mutations, actions, getters, state } from './cart'
+
+const store = () => {
+  return new Vuex.Store({
+    modules: {
+      cart: {
+        namespaced: true,
+        state,
+        mutations,
+        actions,
+        getters
+      }
+    }
   })
-  
-  export type RootState = ReturnType<typeof state>
-  
-  export const mutations = {
-    setMyVariable(state: RootState, value: string) {
-      state.myVariable = value
-    }
-  }
-  
-  export const actions = {
-    updateMyVariable({ commit }: { commit: Function }, value: string) {
-      commit('setMyVariable', value)
-    }
-  }
-  
+}
+
+export default store
