@@ -1,97 +1,103 @@
-import { MutationTree, ActionTree, GetterTree } from 'vuex'
+import { ActionContext } from 'vuex'
 import { Product } from '~/types/product'
 
-export interface CartItem {
-  product: Product
+export interface CartItem extends Product {
   quantity: number
 }
 
-interface CartState {
-  cartItems: CartItem[]
-}
-
-// Cargar datos del carrito desde localStorage (solo en el cliente)
-function loadCartFromLocalStorage(): CartItem[] {
-  if (process.client) {
-    const savedCart = localStorage.getItem('cart')
-    if (savedCart) {
-      return JSON.parse(savedCart)
-    }
-  }
-  return []
-}
-
-// Guardar datos del carrito en localStorage (solo en el cliente)
-function saveCartToLocalStorage(cartItems: CartItem[]): void {
-  if (process.client) {
-    localStorage.setItem('cart', JSON.stringify(cartItems))
-  }
+export interface CartState {
+  items: CartItem[]
 }
 
 export const state = (): CartState => ({
-  cartItems: loadCartFromLocalStorage() // Cargar los productos del carrito desde localStorage
+  items: [] as CartItem[],
 })
 
-export const getters: GetterTree<CartState, any> = {
-  cartItems(state): CartItem[] {
-    return state.cartItems
-  },
-  cartTotal(state): number {
-    return state.cartItems.reduce(
-      (total, item) => total + item.product.price * item.quantity,
-      0
-    )
-  }
-}
-
-export const mutations: MutationTree<CartState> = {
-  addToCart(state, product: Product): void {
-    const item = state.cartItems.find(item => item.product.id === product.id)
-    if (item) {
-      item.quantity++
+export const mutations = {
+  ADD_TO_CART(state: CartState, product: CartItem) {
+    const existingProduct = state.items.find(item => item.id === product.id)
+    if (existingProduct) {
+      existingProduct.quantity += 1
     } else {
-      state.cartItems.push({ product, quantity: 1 })
+      state.items.push({ ...product, quantity: 1 })
     }
-    saveCartToLocalStorage(state.cartItems) // Guardar el carrito en localStorage
+    localStorage.setItem('cartItems', JSON.stringify(state.items))
   },
-  removeFromCart(state, productId: number): void {
-    state.cartItems = state.cartItems.filter(item => item.product.id !== productId)
-    saveCartToLocalStorage(state.cartItems) // Guardar el carrito en localStorage
+
+  REMOVE_FROM_CART(state: CartState, productId: number) {
+    state.items = state.items.filter(item => item.id !== productId)
+    localStorage.setItem('cartItems', JSON.stringify(state.items))
   },
-  increaseQuantity(state, productId: number): void {
-    const item = state.cartItems.find(item => item.product.id === productId)
-    if (item) {
-      item.quantity++
-      saveCartToLocalStorage(state.cartItems) // Guardar el carrito en localStorage
+
+  CLEAR_CART(state: CartState) {
+    state.items = []
+    localStorage.removeItem('cartItems')
+  },
+
+  SET_CART(state: CartState, items: CartItem[]) {
+    state.items = items
+  },
+
+  INCREASE_QUANTITY(state: CartState, productId: number) {
+    const product = state.items.find(item => item.id === productId)
+    if (product) {
+      product.quantity += 1
+      localStorage.setItem('cart', JSON.stringify(state.items)) // Guardar el carrito actualizado en localStorage
     }
   },
-  decreaseQuantity(state, productId: number): void {
-    const item = state.cartItems.find(item => item.product.id === productId)
-    if (item && item.quantity > 1) {
-      item.quantity--
-      saveCartToLocalStorage(state.cartItems) // Guardar el carrito en localStorage
+
+  DECREASE_QUANTITY(state: CartState, productId: number) {
+    const product = state.items.find(item => item.id === productId)
+    if (product && product.quantity > 1) {
+      product.quantity -= 1
+      localStorage.setItem('cart', JSON.stringify(state.items)) // Guardar el carrito actualizado en localStorage
     }
   },
-  clearCart(state): void {
-    state.cartItems = []
-    saveCartToLocalStorage(state.cartItems) // Guardar el carrito vacío en localStorage
-  }
+
 }
 
-export const actions: ActionTree<CartState, any> = {
-  addToCart({ commit }, product: Product): void {
-    commit('addToCart', product)
+export const actions = {
+  addToCart(
+    { commit }: ActionContext<CartState, any>,
+    product: CartItem
+  ) {
+    commit('ADD_TO_CART', product)
   },
-  removeFromCart({ commit }, productId: number): void {
-    commit('removeFromCart', productId)
+
+  removeFromCart(
+    { commit }: ActionContext<CartState, any>,
+    productId: number
+  ) {
+    commit('REMOVE_FROM_CART', productId)
   },
-  increaseQuantity({ commit }, productId: number): void {
-    commit('increaseQuantity', productId)
+
+  clearCart({ commit }: ActionContext<CartState, any>) {
+    commit('CLEAR_CART')
   },
-  decreaseQuantity({ commit }, productId: number): void {
-    commit('decreaseQuantity', productId)
+
+  loadCart({ commit }: ActionContext<CartState, any>) {
+    const cartItems = localStorage.getItem('cartItems')
+    if (cartItems) {
+      commit('SET_CART', JSON.parse(cartItems))
+    }
   },
-  clearCart({ commit }): void {
-    commit('clearCart')
-  }
+
+    increaseQuantity({ commit }: { commit: Function }, productId: number) {
+      commit('INCREASE_QUANTITY', productId)
+    },
+  
+    decreaseQuantity({ commit }: { commit: Function }, productId: number) {
+      commit('DECREASE_QUANTITY', productId)
+    },
+
+}
+
+export const getters = {
+  cartItemCount(state: CartState): number {
+    return state.items.reduce((total, item) => total + item.quantity, 0)
+  },
+
+  cartItems(state: CartState): CartItem[] {
+    return state.items
+  },
 }

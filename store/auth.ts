@@ -1,45 +1,49 @@
-// store/auth.ts
-import { MutationTree, ActionTree } from 'vuex'
-
-export interface AuthState {
-  isAuthenticated: boolean
-  user: { username: string; email: string } | null
+interface User {
+  username: string;
 }
 
-// Estado inicial con tipo explícito
+interface AuthState {
+  user: User | null;
+}
+
 export const state = (): AuthState => ({
-  isAuthenticated: false,
-  user: null
-})
+  user: null,
+});
 
-// Tipar las mutaciones
-export const mutations: MutationTree<AuthState> = {
-  SET_AUTH(state, user: { username: string; email: string }) {
-    state.isAuthenticated = true
-    state.user = user
+export const mutations = {
+  SET_USER(state: AuthState, user: User | null): void {
+    state.user = user;
   },
-  LOGOUT(state) {
-    state.isAuthenticated = false
-    state.user = null
-  }
-}
+  
+  CLEAR_USER(state: AuthState): void {
+    state.user = null;
+  },
+};
 
-// Tipar las acciones
-export const actions: ActionTree<AuthState, any> = {
-  async login(
-    { commit }: { commit: Function },
-    { username, password }: { username: string; password: string }
-  ): Promise<void> {
-    const dummyUser = await { username: 'admin', email: 'admin@example.com', password: 'password123' }
+export const actions = {
+  async login({ commit }: { commit: Function }, credentials: { username: string; password: string }): Promise<User> {
+    const { username, password } = credentials;
 
-    if (username === dummyUser.username && password === dummyUser.password) {
-      commit('SET_AUTH', { username: dummyUser.username, email: dummyUser.email })
+    if (username === 'admin' && password === 'admin123') {
+      const user = { username };
+      commit('SET_USER', user);
+      return await user;
     } else {
-      throw new Error('Invalid credentials')
+      return Promise.reject(new Error('Invalid username or password'));
     }
   },
+  
+  logout({ commit }: { commit: Function }): void {
+    commit('CLEAR_USER');
+  },
+};
 
-  logout({ commit }: { commit: Function }) {
-    commit('LOGOUT')
-  }
-}
+export const getters = {
+  isLoggedIn(state: AuthState): boolean {
+    return !!state.user;
+  },
+  
+  getUser(state: AuthState): User | null {
+    return state.user;
+  },
+};

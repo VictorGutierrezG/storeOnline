@@ -1,5 +1,6 @@
 import Vuex from 'vuex'
 import { mutations, actions, getters, state } from './cart'
+import { mutations as mutationAuth, actions as actionsAuth, state as stateAuth } from './auth'
 
 const store = () => {
   return new Vuex.Store({
@@ -10,6 +11,12 @@ const store = () => {
         mutations,
         actions,
         getters
+      },
+      auth: {
+        namespaced: true,
+        mutations: mutationAuth,
+        actions: actionsAuth,
+        state: stateAuth
       }
     }
   })
