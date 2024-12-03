@@ -21,22 +21,24 @@ export const mutations = {
 };
 
 export const actions = {
-  async login({ commit }: { commit: Function }, credentials: { username: string; password: string }): Promise<User> {
+  login({ commit }: { commit: Function }, credentials: { username: string; password: string }) {
     const { username, password } = credentials;
+
 
     if (username === 'admin' && password === 'admin123') {
       const user = { username };
       commit('SET_USER', user);
-      return await user;
+      return user;
     } else {
       return Promise.reject(new Error('Invalid username or password'));
     }
   },
-  
+
   logout({ commit }: { commit: Function }): void {
     commit('CLEAR_USER');
   },
 };
+
 
 export const getters = {
   isLoggedIn(state: AuthState): boolean {

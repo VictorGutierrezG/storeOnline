@@ -42,7 +42,7 @@ export const mutations = {
     const product = state.items.find(item => item.id === productId)
     if (product) {
       product.quantity += 1
-      localStorage.setItem('cart', JSON.stringify(state.items)) // Guardar el carrito actualizado en localStorage
+      localStorage.setItem('cartItems', JSON.stringify(state.items))
     }
   },
 
@@ -50,7 +50,7 @@ export const mutations = {
     const product = state.items.find(item => item.id === productId)
     if (product && product.quantity > 1) {
       product.quantity -= 1
-      localStorage.setItem('cart', JSON.stringify(state.items)) // Guardar el carrito actualizado en localStorage
+      localStorage.setItem('cartItems', JSON.stringify(state.items)) 
     }
   },
 
@@ -72,6 +72,7 @@ export const actions = {
   },
 
   clearCart({ commit }: ActionContext<CartState, any>) {
+    console.log('clearCart')
     commit('CLEAR_CART')
   },
 
@@ -99,5 +100,12 @@ export const getters = {
 
   cartItems(state: CartState): CartItem[] {
     return state.items
+  },
+
+  cartTotal(state: CartState): number {
+    return state.items.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    )
   },
 }

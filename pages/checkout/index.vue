@@ -4,7 +4,6 @@
         <b-row class="mt-5">
           <b-col>
             <h4>Resumen de la Compra</h4>
-            <!-- Mostrar productos comprados -->
             <b-row v-if="cartItems.length > 0">
               <b-col
                 v-for="(item, index) in cartItems"
@@ -14,24 +13,22 @@
                 md="4"
                 lg="3"
               >
-                <b-card :header="item.product.name" class="mb-3">
-                  <b-card-img :src="item.product.image" alt="Product image" />
+                <b-card :header="item.name" class="mb-3">
+                  <b-card-img :src="item.image" alt="Product image" />
                   <b-card-body>
-                    <p>{{ item.product.description }}</p>
-                    <p><strong>Precio:</strong> \${{ item.product.price.toFixed(2) }}</p>
+                    <p>{{ item.description }}</p>
+                    <p><strong>Precio:</strong> \${{ item.price.toFixed(2) }}</p>
                     <p><strong>Cantidad:</strong> {{ item.quantity }}</p>
-                    <p><strong>Total:</strong> \${{ (item.product.price * item.quantity).toFixed(2) }}</p>
+                    <p><strong>Total:</strong> \${{ (item.price * item.quantity).toFixed(2) }}</p>
                   </b-card-body>
                 </b-card>
               </b-col>
             </b-row>
   
-            <!-- Si el carrito está vacío (lo cual no debería pasar si estamos en la página de checkout) -->
             <b-alert variant="warning" show v-else>
               El carrito está vacío.
             </b-alert>
   
-            <!-- Total de la compra -->
             <h5>Total de la Compra: \${{ cartTotal ? cartTotal.toFixed(2) : '0.00' }}</h5>
             <b-button variant="success" @click="completePurchase" class="mt-3">Confirmar Compra</b-button>
           </b-col>
@@ -42,12 +39,11 @@
   
   <script lang="ts">
   import { Component, Vue } from 'vue-property-decorator'
-  import { CartItem } from '~/store/cart'  // Importa el tipo CartItem
+  import { CartItem } from '~/store/cart'
   
   @Component
   export default class CheckoutPage extends Vue {
   
-    // Getter de Vuex para obtener los productos en el carrito y el total
     get cartItems(): CartItem[] {
       return this.$store.getters['cart/cartItems']
     }
@@ -58,6 +54,10 @@
   
     completePurchase() {
         this.$router.push('/payment')
+    }
+
+    mounted(): void {
+      this.$store.dispatch('cart/loadCart')
     }
   }
   </script>

@@ -21,48 +21,44 @@
         ></b-form-input>
       </b-form-group>
 
-      <b-button type="submit" variant="primary" block>Login</b-button>
-
-      <b-alert v-if="error" variant="danger" class="mt-3">
+      <b-alert v-if="error" show variant="danger" class="mt-3">
         {{ error }}
       </b-alert>
+
+      <b-button type="submit" variant="primary" block>Login</b-button>
     </b-form>
   </b-card>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-
-interface LoginError {
-  message: string;
-}
+import { Component, Vue } from 'vue-property-decorator';
 
 @Component
 export default class LoginPage extends Vue {
-  username: string = ''
-  password: string = ''
-  error: LoginError | null = null
 
-  get isLoggedIn(): boolean {
-    return this.$store.getters['auth/isLoggedIn']
-  }
+  username: string = '';
+  password: string = '';
+  error: string | null = null;
+  
 
   async handleLogin(): Promise<void> {
+    this.error = null;
+
+
     try {
-      await this.$store.dispatch('auth/login', { username: this.username, password: this.password })
-      this.$router.push('/products')
+      await this.$store.dispatch('auth/login', { username: this.username, password: this.password });
+      
+      this.$router.push('/products');
     } catch (err: unknown) {
-      this.handleLoginError(err)
+      this.handleLoginError(err);
     }
   }
 
   private handleLoginError(err: unknown): void {
     if (err instanceof Error) {
-      // Verificamos si err es una instancia de Error
-      this.error = { message: err.message }
+      this.error = err.message;
     } else {
-      // En caso de que err no sea una instancia de Error, asignamos un mensaje genérico
-      this.error = { message: 'An unknown error occurred' }
+      this.error = 'Ocurrió un error desconocido';
     }
   }
 }
