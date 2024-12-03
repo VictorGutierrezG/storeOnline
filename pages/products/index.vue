@@ -1,9 +1,22 @@
 <template>
   <div>
     <b-container>
+      <!-- Filtro de búsqueda -->
+      <b-row class="mb-4">
+        <b-col md="6">
+          <b-form-input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Buscar productos..."
+            aria-label="Buscar productos"
+          />
+        </b-col>
+      </b-row>
+
+      <!-- Mostrar productos filtrados -->
       <b-row>
         <b-col
-          v-for="product in products"
+          v-for="product in filteredProducts"
           :key="product.id"
           cols="12"
           sm="6"
@@ -14,6 +27,7 @@
         </b-col>
       </b-row>
 
+      <!-- Sección del carrito -->
       <b-row class="mt-5">
         <b-col>
           <h4>Carrito de Compras</h4>
@@ -34,6 +48,7 @@
 import { Component, Vue } from 'vue-property-decorator'
 import ProductCard from '~/components/ProductCard.vue'
 import { Product } from '~/types/product'
+import productsData from '~/assets/data/products.json'  // Importar el archivo JSON
 
 @Component({
   components: {
@@ -41,45 +56,12 @@ import { Product } from '~/types/product'
   }
 })
 export default class ProductsPage extends Vue {
-  products: Product[] = [
-    {
-      id: 1,
-      name: 'Producto 1',
-      description: 'Descripción del producto 1',
-      price: 25.99,
-      rating: 4.5,
-      image: 'https://via.placeholder.com/300x200?text=Producto+1',
-      availableQuantity: 10
-    },
-    {
-      id: 2,
-      name: 'Producto 2',
-      description: 'Descripción del producto 2',
-      price: 19.99,
-      rating: 4.0,
-      image: 'https://via.placeholder.com/300x200?text=Producto+2',
-      availableQuantity: 5
-    },
-    {
-      id: 3,
-      name: 'Producto 3',
-      description: 'Descripción del producto 3',
-      price: 10.49,
-      rating: 4.8,
-      image: 'https://via.placeholder.com/300x200?text=Producto+3',
-      availableQuantity: 20
-    },
-    {
-      id: 4,
-      name: 'Producto 4',
-      description: 'Descripción del producto 4',
-      price: 12.99,
-      rating: 3.9,
-      image: 'https://via.placeholder.com/300x200?text=Producto+4',
-      availableQuantity: 15
-    }
-  ]
+  searchQuery: string = ''  // Variable reactiva para el texto de búsqueda
 
+  // Utilizamos los datos importados del archivo JSON
+  products: Product[] = productsData
+
+  // Getter de Vuex para obtener los productos en el carrito y el total
   get cartItems() {
     return this.$store.getters['cart/cartItems']
   }
@@ -88,6 +70,16 @@ export default class ProductsPage extends Vue {
     return this.$store.getters['cart/cartTotal']
   }
 
+  // Filtrar productos según el texto de búsqueda
+  get filteredProducts() {
+    const query = this.searchQuery.toLowerCase()
+    return this.products.filter(product =>
+      product.name.toLowerCase().includes(query) ||
+      product.description.toLowerCase().includes(query)
+    )
+  }
+
+  // Vaciar carrito
   clearCart() {
     this.$store.dispatch('cart/clearCart')
   }
@@ -95,6 +87,7 @@ export default class ProductsPage extends Vue {
 </script>
 
 <style scoped>
+/* Estilo para la página de productos */
 b-container {
   margin-top: 30px;
 }
