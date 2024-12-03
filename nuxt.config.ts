@@ -14,6 +14,11 @@ export default {
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
 
+  server: {
+    port: process.env.PORT || 3000, // Puerto en el que Nuxt escucha (Vercel asigna uno dinámico)
+    host: '0.0.0.0', // Aceptar conexiones de todas las interfaces
+  },
+
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [],
 
